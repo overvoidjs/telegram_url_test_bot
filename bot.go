@@ -58,6 +58,7 @@ func sendMessage(msg string) {
 
 }
 
+//Запрашиваем код ответа
 func testUrl(url string) int {
   resp, err := http.Get(url)
   if err != nil {
@@ -67,9 +68,10 @@ func testUrl(url string) int {
   return resp.StatusCode
 }
 
-func main() {
-
+//Основная функция
+func run(){
   tests := getList()
+  timeout, _ := strconv.Atoi(getEnv("TIMEOUT"))
 
   for _, url := range tests {
     //Получаем код проверки
@@ -79,11 +81,20 @@ func main() {
       sendMessage(url+" отвечает "+strconv.Itoa(respTest))
     }
     //Поспим одну секунду что бы не грузить сервер
-    time.Sleep(1 * time.Second)
+    time.Sleep(time.Duration(timeout) * time.Second)
   }
 
   //Уведомление о проверке
   t := time.Now().Format("2006-01-02 15:04:05")
   sendMessage("Проверка доступности от "+t+" завершена")
+}
+
+func main() {
+  log.Print("Бот запущен")
+  for {
+    run()
+    looptime, _ := strconv.Atoi(getEnv("LOOP_TIME"))
+    time.Sleep(time.Duration(looptime) * time.Minute)
+  }
 
 }
